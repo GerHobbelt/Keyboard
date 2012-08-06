@@ -157,7 +157,7 @@ $.keyboard = function(el, inputs, options){
 			if ( e.target && $(e.target).hasClass('ui-keyboard-input') ) {
 				var kb = $(e.target).data('keyboard');
 				if (kb && kb.options.openOn.length) {
-					kb.focusOn();
+					kb.focusOn(e.target);
 				}
 			}
 		});
@@ -176,7 +176,7 @@ $.keyboard = function(el, inputs, options){
 		});
 		if (o.openOn) {
 			base.$inputs.bind(o.openOn + '.keyboard', function(){
-				base.focusOn();
+				base.focusOn(this);
 			});
 		}
 
@@ -198,7 +198,13 @@ $.keyboard = function(el, inputs, options){
 
 	};
 
-	base.focusOn = function(){
+	base.focusOn = function(focus){
+		if (focus) {
+			base.$focus = $(focus);
+			if (!o.usePreview) {
+				base.$preview = base.$focus;
+			}
+		}
 		if (base.$focus.is(':visible')) {
 			// caret position is always 0,0 in webkit; and nothing is focused at this point... odd
 			// save caret position in the input to transfer it to the preview
@@ -226,7 +232,7 @@ $.keyboard = function(el, inputs, options){
 
 		// Unbind focus to prevent recursion - openOn may be empty if keyboard is opened externally
 		if (o.openOn) {
-			base.$inputs.unbind( o.openOn + '.keyboard' );
+			base.$focus.unbind( o.openOn + '.keyboard' );
 		}
 
 		// build keyboard if it doesn't exist
@@ -786,7 +792,7 @@ $.keyboard = function(el, inputs, options){
 				base.close(isAccepted);
 				kb = all.eq(indx).data('keyboard');
 				if (kb && kb.options.openOn.length) {
-					kb.focusOn();
+					kb.focusOn(all.eq(indx));
 				}
 			}
 		}
@@ -818,7 +824,7 @@ $.keyboard = function(el, inputs, options){
 			if (o.openOn) {
 				// rebind input focus - delayed to fix IE issue #72
 				base.timer = setTimeout(function(){
-					base.$inputs.bind( o.openOn + '.keyboard', function(){ base.focusOn(); });
+					base.$focus.bind( o.openOn + '.keyboard', function(){ base.focusOn(this); });
 					// remove focus from element (needed for IE since blur doesn't seem to work)
 					if ($(':focus')[0] === base.$focus.get(0)) { base.$focus.blur(); }
 				}, 500);
@@ -1420,6 +1426,10 @@ $.keyboard = function(el, inputs, options){
 			'^' : { a:"\u00e2", A:"\u00c2", e:"\u00ea", E:"\u00ca", i:"\u00ee", I:"\u00ce", o:"\u00f4", O:"\u00d4", u:"\u00fb", U:"\u00db", y:"\u0177", Y:"\u0176" }, // circumflex
 			'~' : { a:"\u00e3", A:"\u00c3", e:"\u1ebd", E:"\u1ebc", i:"\u0129", I:"\u0128", o:"\u00f5", O:"\u00d5", u:"\u0169", U:"\u0168", y:"\u1ef9", Y:"\u1ef8", n:"\u00f1", N:"\u00d1" } // tilde
 		},
+		
+		// If a singleton element is defined, it will be used as the container for the keyboard ui.
+		// The singleton keyboard is used of all input elements it is applied to
+		singleton : null,
 
 /*
 		// *** Methods ***
@@ -1450,11 +1460,18 @@ $.keyboard = function(el, inputs, options){
 	$.keyboard.currentKeyboard = '';
 
 	$.fn.keyboard = function(options){
-		return this.each(function(){
-			if (!$(this).data('keyboard')) {
-				(new $.keyboard(this, this, options));
+		if (options.singleton) {
+			if (!$(options.singleton).data('keyboard')) {
+				(new $.keyboard(options.singleton, this, options));
 			}
-		});
+			return this;
+		} else {
+			return this.each(function(){
+				if (!$(this).data('keyboard')) {
+					(new $.keyboard(this, this, options));
+				}
+			});
+		}
 	};
 
 	$.fn.getkeyboard = function(){
