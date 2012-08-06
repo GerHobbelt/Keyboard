@@ -97,15 +97,19 @@ CSS:
 	.ui-keyboard-nokeyboard { color: #888; border-color: #888; } - disabled or readonly inputs, or use input[disabled='disabled'] { color: #f00; }
 */
 ;(function($){
-$.keyboard = function(el, options){
+$.keyboard = function(el, inputs, options){
 	var base = this, o;
 
 	// Access to jQuery and DOM versions of element
 	base.$el = $(el);
 	base.el = el;
+	
+	base.$inputs = $(inputs);
+	base.$focus = base.$inputs.first();
 
-	// Add a reverse reference to the DOM object
+	// Add a reverse reference to the DOM object and the inputs
 	base.$el.data("keyboard", base);
+	base.$inputs.data("keyboard", base);
 
 	base.init = function(){
 		base.options = o = $.extend(true, {}, $.keyboard.defaultOptions, options);
@@ -120,7 +124,7 @@ $.keyboard = function(el, options){
 		$('<!--[if lte IE 8]><script>jQuery("body").addClass("oldie");</script><![endif]--><!--[if IE]><script>jQuery("body").addClass("ie");</script><![endif]-->').appendTo('body').remove();
 		base.msie = $('body').hasClass('oldie'); // Old IE flag, used for caret positioning
 		base.allie = $('body').hasClass('ie'); // $.browser.msie being removed soon
-		base.inPlaceholder = base.$el.attr('placeholder') || '';
+		base.inPlaceholder = base.$inputs.attr('placeholder') || '';
 		base.watermark = (typeof(document.createElement('input').placeholder) !== 'undefined' && base.inPlaceholder !== ''); // html 5 placeholder/watermark
 		base.regex = $.keyboard.comboRegex; // save default regex (in case loading another layout changes it)
 		base.decimal = ( /^\./.test(o.display.dec) ) ? true : false; // determine if US "." or European "," system being used
@@ -140,7 +144,7 @@ $.keyboard = function(el, options){
 		// Bind events
 		$.each('initialized visible change hidden canceled accepted beforeClose'.split(' '), function(i,f){
 			if ($.isFunction(o[f])){
-				base.$el.bind(f + '.keyboard', o[f]);
+				base.$inputs.bind(f + '.keyboard', o[f]);
 			}
 		});
 
@@ -159,28 +163,33 @@ $.keyboard = function(el, options){
 		});
 
 		// Display keyboard on focus
-		base.$el
+		base.$inputs
 			.addClass('ui-keyboard-input ' + o.css.input)
 			.attr({ 'aria-haspopup' : 'true', 'role' : 'textbox' });
 
 		// add disabled/readonly class - dynamically updated on reveal
-		if (base.$el.is(':disabled') || (base.$el.attr('readonly') && !base.$el.hasClass('ui-keyboard-lockedinput'))) {
-			base.$el.addClass('ui-keyboard-nokeyboard');
-		}
+		base.$inputs.each(function() {
+			var $input = $(this);
+			if ($input.is(':disabled') || ($input.attr('readonly') && !$input.hasClass('ui-keyboard-lockedinput'))) {
+				$input.addClass('ui-keyboard-nokeyboard');
+			}
+		});
 		if (o.openOn) {
-			base.$el.bind(o.openOn + '.keyboard', function(){
+			base.$inputs.bind(o.openOn + '.keyboard', function(){
 				base.focusOn();
 			});
 		}
 
 		// Add placeholder if not supported by the browser
-		if (!base.watermark && base.$el.val() === '' && base.inPlaceholder !== '' && base.$el.attr('placeholder') !== '') {
-			base.$el
-				.addClass('ui-keyboard-placeholder') // css watermark style (darker text)
-				.val( base.inPlaceholder );
-		}
-
-		base.$el.trigger( 'initialized.keyboard', [ base, base.el ] );
+		base.$inputs.each(function() {
+			var $input = $(this);
+			if (!base.watermark && $input.val() === '' && base.inPlaceholder !== '' && $input.attr('placeholder') !== '') {
+				$input
+					.addClass('ui-keyboard-placeholder') // css watermark style (darker text)
+					.val( base.inPlaceholder );
+			}
+		});
+		base.$inputs.trigger( 'initialized.keyboard', [ base, base.el ] );
 
 		// initialized with keyboard open
 		if (o.alwaysOpen) {
@@ -190,10 +199,10 @@ $.keyboard = function(el, options){
 	};
 
 	base.focusOn = function(){
-		if (base.$el.is(':visible')) {
+		if (base.$focus.is(':visible')) {
 			// caret position is always 0,0 in webkit; and nothing is focused at this point... odd
 			// save caret position in the input to transfer it to the preview
-			base.lastCaret = base.$el.caret();
+			base.lastCaret = base.$focus.caret();
 		}
 		if (!base.isVisible() || o.alwaysOpen) {
 			clearTimeout(base.timer);
@@ -208,16 +217,16 @@ $.keyboard = function(el, options){
 		$('.ui-keyboard:not(.ui-keyboard-always-open)').hide();
 
 		// Don't open if disabled
-		if (base.$el.is(':disabled') || (base.$el.attr('readonly') && !base.$el.hasClass('ui-keyboard-lockedinput'))) {
-			base.$el.addClass('ui-keyboard-nokeyboard');
+		if (base.$focus.is(':disabled') || (base.$focus.attr('readonly') && !base.$focus.hasClass('ui-keyboard-lockedinput'))) {
+			base.$focus.addClass('ui-keyboard-nokeyboard');
 			return;
 		} else {
-			base.$el.removeClass('ui-keyboard-nokeyboard');
+			base.$focus.removeClass('ui-keyboard-nokeyboard');
 		}
 
 		// Unbind focus to prevent recursion - openOn may be empty if keyboard is opened externally
 		if (o.openOn) {
-			base.$el.unbind( o.openOn + '.keyboard' );
+			base.$inputs.unbind( o.openOn + '.keyboard' );
 		}
 
 		// build keyboard if it doesn't exist
@@ -227,17 +236,17 @@ $.keyboard = function(el, options){
 		$('.ui-keyboard-has-focus').removeClass('ui-keyboard-has-focus');
 		$('.ui-keyboard-input-current').removeClass('ui-keyboard-input-current');
 
-		base.$el.addClass('ui-keyboard-input-current');
+		base.$focus.addClass('ui-keyboard-input-current');
 		base.isCurrent(true);
 
 		// clear watermark
-		if (!base.watermark && base.el.value === base.inPlaceholder) {
-			base.$el
+		if (!base.watermark && base.$focus.val() === base.inPlaceholder) {
+			base.$focus
 				.removeClass('ui-keyboard-placeholder')
 				.val('');
 		}
 		// save starting content, in case we cancel
-		base.originalContent = base.$el.val();
+		base.originalContent = base.$focus.val();
 		base.$preview.val( base.originalContent );
 
 		// disable/enable accept button
@@ -246,7 +255,7 @@ $.keyboard = function(el, options){
 		// get single target position || target stored in element data (multiple targets) || default, at the element
 		var p, s;
 		base.position = o.position;
-		base.position.of = base.position.of || base.$el.data('keyboardPosition') || base.$el;
+		base.position.of = base.position.of || base.$focus.data('keyboardPosition') || base.$focus;
 		base.position.collision = (o.usePreview) ? base.position.collision || 'fit fit' : 'flip flip';
 
 		if (o.resetDefault) {
@@ -293,7 +302,7 @@ $.keyboard = function(el, options){
 		}
 		base.$preview.caret(base.lastCaret.start, base.lastCaret.end );
 
-		base.$el.trigger( 'visible.keyboard', [ base, base.el ] );
+		base.$focus.trigger( 'visible.keyboard', [ base, base.$focus.get(0) ] );
 		// opening keyboard flag; delay allows switching between keyboards without immediately closing the keyboard
 		setTimeout(function(){
 			base.opening = false;
@@ -368,7 +377,7 @@ $.keyboard = function(el, options){
 				}, 100);
 
 				base.checkMaxLength();
-				base.$el.trigger( 'change.keyboard', [ base, base.el ] );
+				base.$inputs.trigger( 'change.keyboard', [ base, base.el ] );
 			})
 			.bind('keydown.keyboard', function(e){
 				switch (e.which) {
@@ -412,7 +421,7 @@ $.keyboard = function(el, options){
 		// If preventing paste, block context menu (right click)
 		if (o.preventPaste){
 			base.$preview.bind('contextmenu.keyboard', function(e){ e.preventDefault(); });
-			base.$el.bind('contextmenu.keyboard', function(e){ e.preventDefault(); });
+			base.$inputs.bind('contextmenu.keyboard', function(e){ e.preventDefault(); });
 		}
 
 		if (o.appendLocally) {
@@ -442,7 +451,7 @@ $.keyboard = function(el, options){
 				}
 				base.checkCombos();
 				base.checkMaxLength();
-				base.$el.trigger( 'change.keyboard', [ base, base.el ] );
+				base.$inputs.trigger( 'change.keyboard', [ base, base.$focus.get(0) ] );
 				base.$preview.focus();
 				e.preventDefault();
 			})
@@ -451,7 +460,7 @@ $.keyboard = function(el, options){
 				var el = this, $this = $(this),
 					// 'key' = { action: doAction, original: n, curTxt : n, curNum: 0 }
 					key = $.data(el, 'key');
-				if (e.type === 'mouseenter' && base.el.type !== 'password' ){
+				if (e.type === 'mouseenter' && base.$focus.get(0).type !== 'password' ){
 					$this
 						.addClass(o.css.buttonHover)
 						.attr('title', function(i,t){
@@ -464,7 +473,7 @@ $.keyboard = function(el, options){
 					key.curNum = 0;
 					$.data(el, 'key', key);
 					$this
-						.removeClass( (base.el.type === 'password') ? '' : o.css.buttonHover) // needed or IE flickers really bad
+						.removeClass( (base.$focus.get(0).type === 'password') ? '' : o.css.buttonHover) // needed or IE flickers really bad
 						.attr('title', function(i,t){ return (t === o.wheelMessage) ? '' : t; })
 						.find('span').text( key.original ); // restore original button text
 				}
@@ -748,11 +757,11 @@ $.keyboard = function(el, options){
 	base.isCurrent = function(set){
 		var cur = $.keyboard.currentKeyboard || false;
 		if (set) {
-			cur = $.keyboard.currentKeyboard = base.el;
-		} else if (set === false && cur === base.el) {
+			cur = $.keyboard.currentKeyboard = base.$focus.get(0);
+		} else if (set === false && cur === base.$focus.get(0)) {
 			cur = $.keyboard.currentKeyboard = '';
 		}
-		return cur === base.el;
+		return cur === base.$focus.get(0);
 	};
 
 	// Go to next or prev inputs
@@ -764,7 +773,7 @@ $.keyboard = function(el, options){
 		} else {
 			var kb, stopped = false,
 				all = $('.ui-keyboard-input:visible'),
-				indx = all.index(base.$el) + (goToNext ? 1 : -1);
+				indx = all.index(base.$focus) + (goToNext ? 1 : -1);
 			if (indx > all.length - 1) {
 				stopped = o.stopAtEnd;
 				indx = 0; // go to first input
@@ -796,29 +805,29 @@ $.keyboard = function(el, options){
 				if (o.cancelClose) { return; }
 			}
 			base.isCurrent(false);
-			base.$el
+			base.$focus
 				.removeClass('ui-keyboard-input-current ui-keyboard-autoaccepted')
 				// add "ui-keyboard-autoaccepted" to inputs
 				.addClass( (accepted || false) ? accepted === true ? '' : 'ui-keyboard-autoaccepted' : '' )
-				.trigger( (o.alwaysOpen) ? '' : 'beforeClose.keyboard', [ base, base.el, (accepted || false) ] )
+				.trigger( (o.alwaysOpen) ? '' : 'beforeClose.keyboard', [ base, base.$focus.get(0), (accepted || false) ] )
 				.val( val )
-				.scrollTop( base.el.scrollHeight )
-				.trigger( ((accepted || false) ? 'accepted.keyboard' : 'canceled.keyboard'), [ base, base.el ] )
-				.trigger( (o.alwaysOpen) ? 'inactive.keyboard' : 'hidden.keyboard', [ base, base.el ] )
+				.scrollTop( base.$focus.get(0).scrollHeight )
+				.trigger( ((accepted || false) ? 'accepted.keyboard' : 'canceled.keyboard'), [ base, base.$focus.get(0) ] )
+				.trigger( (o.alwaysOpen) ? 'inactive.keyboard' : 'hidden.keyboard', [ base, base.$focus.get(0) ] )
 				.blur();
 			if (o.openOn) {
 				// rebind input focus - delayed to fix IE issue #72
 				base.timer = setTimeout(function(){
-					base.$el.bind( o.openOn + '.keyboard', function(){ base.focusOn(); });
+					base.$inputs.bind( o.openOn + '.keyboard', function(){ base.focusOn(); });
 					// remove focus from element (needed for IE since blur doesn't seem to work)
-					if ($(':focus')[0] === base.el) { base.$el.blur(); }
+					if ($(':focus')[0] === base.$focus.get(0)) { base.$focus.blur(); }
 				}, 500);
 			}
 			if (!o.alwaysOpen) {
 				base.$keyboard.hide();
 			}
-			if (!base.watermark && base.el.value === '' && base.inPlaceholder !== '') {
-				base.$el
+			if (!base.watermark && base.$focus.val() === '' && base.inPlaceholder !== '') {
+				base.$focus
 					.addClass('ui-keyboard-placeholder')
 					.val(base.inPlaceholder);
 			}
@@ -839,7 +848,7 @@ $.keyboard = function(el, options){
 		if ( !base.isVisible() || (o.alwaysOpen && !cur) || (!o.alwaysOpen && o.stayOpen && cur && !base.isVisible()) ) { return; }
 		// ignore autoaccept if using escape - good idea?
 
-		if ( e.target !== base.el && cur ) {
+		if ( e.target !== base.$focus.get(0) && cur ) {
 			// stop propogation in IE - an input getting focus doesn't open a keyboard if one is already open
 			if ( base.allie ) {
 				e.preventDefault();
@@ -907,7 +916,7 @@ $.keyboard = function(el, options){
 
 		// build preview display
 		if (o.usePreview) {
-			base.$preview = base.$el.clone(false)
+			base.$preview = base.$focus.clone(false)
 				.removeAttr('id')
 				.removeClass('ui-keyboard-placeholder ui-keyboard-input')
 				.addClass('ui-keyboard-preview ' + o.css.input)
@@ -920,7 +929,7 @@ $.keyboard = function(el, options){
 				.appendTo(container);
 		} else {
 			// No preview display, use element and reposition the keyboard under it.
-			base.$preview = base.$el;
+			base.$preview = base.$focus;
 			o.position.at = o.position.at2;
 		}
 		if (o.lockInput) {
@@ -1082,7 +1091,7 @@ $.keyboard = function(el, options){
 		$(document).unbind('mousedown.keyboard keyup.keyboard');
 		if (base.$keyboard) { base.$keyboard.remove(); }
 		var unb = $.trim(o.openOn + ' accepted beforeClose canceled change contextmenu hidden initialized keydown keypress keyup visible').split(' ').join('.keyboard ');
-		base.$el
+		$(base.$el, base.$inputs)
 			.removeClass('ui-keyboard-input ui-keyboard-lockedinput ui-keyboard-placeholder ui-keyboard-notallowed ui-keyboard-always-open ' + o.css.input)
 			.removeAttr('aria-haspopup')
 			.removeAttr('role')
@@ -1126,7 +1135,7 @@ $.keyboard = function(el, options){
 		},
 		// el is the pressed key (button) object; it is null when the real keyboard enter is pressed
 		enter : function(base, el, e) {
-			var tag = base.el.tagName, o = base.options;
+			var tag = base.$focus.get(0).tagName, o = base.options;
 			// shift-enter in textareas
 			if (e.shiftKey) {
 				// textarea & input - enterMod + shift + enter = accept, then go to prev; base.switchInput(goToNext, autoAccept)
@@ -1173,7 +1182,7 @@ $.keyboard = function(el, options){
 			base.insertText(' ');
 		},
 		tab : function(base) {
-			var tag = base.el.tagName, 
+			var tag = base.$focus.get(0).tagName, 
 				o = base.options;
 			
 			if (tag === 'INPUT') {
@@ -1443,7 +1452,7 @@ $.keyboard = function(el, options){
 	$.fn.keyboard = function(options){
 		return this.each(function(){
 			if (!$(this).data('keyboard')) {
-				(new $.keyboard(this, options));
+				(new $.keyboard(this, this, options));
 			}
 		});
 	};
