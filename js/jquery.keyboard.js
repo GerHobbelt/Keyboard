@@ -148,6 +148,9 @@ $.keyboard = function(el, inputs, options){
 			}
 		});
 
+		// Singleton implies that we want the keyboard to stay open all the time
+		if (o.singleton) { o.alwaysOpen = true; }
+		
 		// Close with esc key & clicking outside
 		if (o.alwaysOpen) { o.stayOpen = true; }
 		$(document).bind('mousedown.keyboard keyup.keyboard', function(e){
