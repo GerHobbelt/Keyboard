@@ -156,7 +156,7 @@ $.keyboard = function(el, inputs, options){
 			// needed for IE to allow switching between keyboards smoothly
 			if ( e.target && $(e.target).hasClass('ui-keyboard-input') ) {
 				var kb = $(e.target).data('keyboard');
-				if (kb && kb.options.openOn.length) {
+				if (kb && kb.options.openOn && kb.options.openOn.length) {
 					kb.focusOn(e.target);
 				}
 			}
@@ -791,7 +791,7 @@ $.keyboard = function(el, inputs, options){
 			if (!stopped) {
 				base.close(isAccepted);
 				kb = all.eq(indx).data('keyboard');
-				if (kb && kb.options.openOn.length) {
+				if (kb && kb.options.openOn && kb.options.openOn.length) {
 					kb.focusOn(all.eq(indx));
 				}
 			}
@@ -1460,7 +1460,7 @@ $.keyboard = function(el, inputs, options){
 	$.keyboard.currentKeyboard = '';
 
 	$.fn.keyboard = function(options){
-		if (options.singleton) {
+		if (options && options.singleton) {
 			if (!$(options.singleton).data('keyboard')) {
 				(new $.keyboard(options.singleton, this, options));
 			}
