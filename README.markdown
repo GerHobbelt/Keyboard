@@ -73,6 +73,11 @@ Moved to the Wiki Pages: [Home](https://github.com/Mottie/Keyboard/wiki/Home) | 
 
 Only the latest changes will be shown below, see the wiki log to view older versions.
 
+### Version 1.12.1 (9/4/2012)
+
+* Add singleton option to the options.
+  * See [issue #88](https://github.com/Mottie/Keyboard/issues/83) for details.
+
 ### Version 1.12 (7/24/2012)
 
 * Made api functions `accept()` and `close()` return a boolean showing if the content was accepted or not.
