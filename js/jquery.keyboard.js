@@ -1,6 +1,6 @@
 /*!
 jQuery UI Virtual Keyboard
-Version 1.13.1
+Version 1.15.1
 
 Author: Jeremy Satterfield
 Modified: Rob Garrison (Mottie on github)
@@ -68,6 +68,7 @@ Options:
 				{clear}       - Clear input window - used in num pad
 				{combo}       - Toggle combo (diacritic) key
 				{dec}         - Decimal for numeric entry, only allows one decimal (optional use in num pad)
+				{default}     - Switch to the default keyset
 				{e}, {enter}  - Return/New Line
 				{lock}        - Caps lock key
 				{meta#}       - Meta keys that change the key set (# can be any integer)
@@ -80,22 +81,9 @@ Options:
 				{t}, {tab}    - Tab
 
 CSS:
-	.ui-keyboard { padding: .3em; position: absolute; left: 0; top: 0; z-index: 16000; }
-	.ui-keyboard-has-focus { z-index: 16001; }
-	.ui-keyboard div { font-size: 1.1em; }
-	.ui-keyboard-button { height: 2em; width: 2em; margin: .1em; cursor: pointer; overflow: hidden; line-height: 2em; }
-	.ui-keyboard-button span { padding: 0; margin: 0; white-space:nowrap; }
-	.ui-keyboard-button-endrow { clear: left; }
-	.ui-keyboard-widekey { width: 4em; }
-	.ui-keyboard-space { width: 15em; text-indent: -999em; }
-	.ui-keyboard-preview-wrapper { text-align: center; }
-	.ui-keyboard-preview { text-align: left; margin: 0 0 3px 0; display: inline; width: 99%;} - width is calculated in IE, since 99% = 99% full browser width
-	.ui-keyboard-keyset { text-align: center; white-space: nowrap; }
-	.ui-keyboard-input { text-align: left; }
-	.ui-keyboard-input-current { -moz-box-shadow: 1px 1px 10px #00f; -webkit-box-shadow: 1px 1px 10px #00f; box-shadow: 1px 1px 10px #00f; }
-	.ui-keyboard-placeholder { color: #888; }
-	.ui-keyboard-nokeyboard { color: #888; border-color: #888; } - disabled or readonly inputs, or use input[disabled='disabled'] { color: #f00; }
+	Please see the keyboard.css file
 */
+/*jshint browser:true, jquery:true, unused:false */
 ;(function($){
 $.keyboard = function(el, inputs, options){
 	var base = this, o;
@@ -153,7 +141,7 @@ $.keyboard = function(el, inputs, options){
 		
 		// Close with esc key & clicking outside
 		if (o.alwaysOpen) { o.stayOpen = true; }
-		$(document).bind('mousedown.keyboard keyup.keyboard', function(e){
+		$(document).bind('mousedown.keyboard keyup.keyboard touchstart.keyboard', function(e){
 			if (base.opening) { return; }
 			base.escClose(e);
 			// needed for IE to allow switching between keyboards smoothly
@@ -402,6 +390,7 @@ $.keyboard = function(el, inputs, options){
 							base.tab = true; // see keyup comment above
 							return false;
 						}
+						break; // adding a break here to make jsHint happy
 
 					case 13:
 						$.keyboard.keyaction.enter(base, null, e);
@@ -422,11 +411,11 @@ $.keyboard = function(el, inputs, options){
 						break;
 				}
 			})
-			.bind('mouseup.keyboard', function(){
+			.bind('mouseup.keyboard touchend.keyboard', function(){
 				if (base.checkCaret) { base.lastCaret = base.$preview.caret(); }
 			});
 			// prevent keyboard event bubbling
-			base.$keyboard.bind('mousedown.keyboard click.keyboard', function(e){
+			base.$keyboard.bind('mousedown.keyboard click.keyboard touchstart.keyboard', function(e){
 				e.stopPropagation();
 			});
 
@@ -677,7 +666,8 @@ $.keyboard = function(el, inputs, options){
 				val = val.replace(base.regex, function(s, accent, letter){
 					return (o.combos.hasOwnProperty(accent)) ? o.combos[accent][letter] || s : s;
 				});
-			} else {
+			// prevent combo replace error, in case the keyboard closes - see issue #116
+			} else if (base.$preview.length) {
 				// Modern browsers - check for combos from last two characters left of the caret
 				t = pos.start - (pos.start - 2 >= 0 ? 2 : 0);
 				// target last two characters
@@ -1100,7 +1090,7 @@ $.keyboard = function(el, inputs, options){
 	};
 
 	base.destroy = function() {
-		$(document).unbind('mousedown.keyboard keyup.keyboard');
+		$(document).unbind('mousedown.keyboard keyup.keyboard touchstart.keyboard');
 		if (base.$keyboard) { base.$keyboard.remove(); }
 		var unb = $.trim(o.openOn + ' accepted beforeClose canceled change contextmenu hidden initialized keydown keypress keyup visible').split(' ').join('.keyboard ');
 		$(base.$el, base.$inputs)
@@ -1144,6 +1134,10 @@ $.keyboard = function(el, inputs, options){
 		},
 		dec : function(base){
 			base.insertText((base.decimal) ? '.' : ',');
+		},
+		"default" : function(base,el){
+			base.shiftActive = base.altActive = base.metaActive = false;
+			base.showKeySet(el);
 		},
 		// el is the pressed key (button) object; it is null when the real keyboard enter is pressed
 		enter : function(base, el, e) {
@@ -1344,7 +1338,7 @@ $.keyboard = function(el, inputs, options){
 			's'      : '\u21e7:Shift',        // thick hollow up arrow
 			'shift'  : 'Shift:Shift',
 			'sign'   : '\u00b1:Change Sign',  // +/- sign for num pad
-			'space'  : '\ufe42\ufe41:Space',
+			'space'  : '&nbsp;:Space',
 			't'      : '\u21e5:Tab',          // right arrow to bar (used since this virtual keyboard works with one directional tabs)
 			'tab'    : '\u21e5 Tab:Tab'       // \u21b9 is the true tab symbol (left & right arrows)
 		},
@@ -1420,7 +1414,7 @@ $.keyboard = function(el, inputs, options){
 		openOn       : 'focus',
 
 		// Event (namepaced) for when the character is added to the input (clicking on the keyboard)
-		keyBinding   : 'mousedown',
+		keyBinding   : 'mousedown touchstart',
 
 		// combos (emulate dead keys : http://en.wikipedia.org/wiki/Keyboard_layout#US-International)
 		// if user inputs `a the script converts it to à, ^o becomes ô, etc.
@@ -1492,6 +1486,7 @@ $.keyboard = function(el, inputs, options){
  * Highly modified from the original
  */
 (function($, len, createRange, duplicate){
+"use strict";
 $.fn.caret = function(options,opt2) {
 	if ( typeof this[0] === 'undefined' || this.is(':hidden') || this.css('visibility') === 'hidden' ) { return this; }
 	var n, s, start, e, end, selRange, range, stored_range, te, val,

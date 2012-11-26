@@ -2,7 +2,7 @@ jQuery(function($) {
 
 	// Theme switcher
 	// ********************
-	$('#switcher').themeswitcher();
+	// $('#switcher').themeswitcher();
 
 	// QWERTY Text Input
 	// The bottom of this file is where the autocomplete extension is added
@@ -235,6 +235,98 @@ jQuery(function($) {
 			my : 'center top',
 			at : 'center top'
 		}
+	});
+
+	// Custom: iPad by gitaarik
+	// ********************
+	$('#ipad').keyboard({
+
+		display: {
+			'bksp'   :  "\u2190",
+			'accept' : 'return',
+			'default'  : 'ABC',
+			'shift'  : '\u21d1',
+			'meta1'  : '.?123',
+			'meta2'  : '#+='
+		},
+
+		layout: 'custom',
+
+		customLayout: {
+
+			'default': [
+				'q w e r t y u i o p {bksp}',
+				'a s d f g h j k l {enter}',
+				'{s} z x c v b n m , . {s}',
+				'{meta1} {space} {meta1} {accept}'
+			],
+			'shift': [
+				'Q W E R T Y U I O P {bksp}',
+				'A S D F G H J K L {enter}',
+				'{s} Z X C V B N M ! ? {s}',
+				'{meta1} {space} {meta1} {accept}'
+			],
+			'meta1': [
+				'1 2 3 4 5 6 7 8 9 0 {bksp}',
+				'- / : ; ( ) \u20ac & @ {enter}',
+				'{meta2} . , ? ! \' " {meta2}',
+				'{default} {space} {default} {accept}'
+			],
+			'meta2': [
+				'[ ] { } # % ^ * + = {bksp}',
+				'_ \\ | ~ < > $ \u00a3 \u00a5 {enter}',
+				'{meta1} . , ? ! \' " {meta1}',
+				'{default} {space} {default} {accept}'
+			]
+
+		}
+
+	});
+
+	// Custom: iPad email by gitaarik
+	// ********************
+	$('#ipad-email').keyboard({
+
+		display: {
+			'bksp': '\u2190',
+			'enter': 'return',
+			'default': 'ABC',
+			'meta1': '.?123',
+			'meta2': '#+=',
+			'accept': '\u21d3'
+		},
+
+		layout: 'custom',
+
+		customLayout: {
+
+			'default': [
+				'q w e r t y u i o p {bksp}',
+				'a s d f g h j k l {enter}',
+				'{s} z x c v b n m @ . {s}',
+				'{meta1} {space} _ - {accept}'
+			],
+			'shift': [
+				'Q W E R T Y U I O P {bksp}',
+				'A S D F G H J K L {enter}',
+				'{s} Z X C V B N M @ . {s}',
+				'{meta1} {space} _ - {accept}'
+			],
+			'meta1': [
+				'1 2 3 4 5 6 7 8 9 0 {bksp}',
+				'` | { } % ^ * / \' {enter}',
+				'{meta2} $ & ~ # = + . {meta2}',
+				'{default} {space} ! ? {accept}'
+			],
+			'meta2': [
+				'[ ] { } \u2039 \u203a ^ * " , {bksp}',
+				'\\ | / < > $ \u00a3 \u00a5 \u2022 {enter}',
+				'{meta1} \u20ac & ~ # = + . {meta1}',
+				'{default} {space} ! ? {accept}'
+			]
+
+		}
+
 	});
 
 	// Console showing callback messages under the theme switcher
