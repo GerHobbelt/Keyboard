@@ -1,5 +1,5 @@
 /*
- * jQuery UI Virtual Keyboard Autocomplete v1.3 for Keyboard v1.8+ only
+ * jQuery UI Virtual Keyboard Autocomplete v1.4 for Keyboard v1.8+ only
  *
  * By Rob Garrison (aka Mottie & Fudgey)
  * Licensed under the MIT License
@@ -25,19 +25,23 @@
  *   .addAutoComplete();    // this keyboard extension
  * 
  */
-
+/*jshint browser:true, jquery:true, unused:false */
 (function($){
+"use strict";
 $.fn.addAutocomplete = function(){
 	return this.each(function(){
 		// make sure a keyboard is attached
 		var base = $(this).data('keyboard');
 		if (!base) { return; }
 
+		// jQuery UI versions 1.9+ are different
+		base.autocomplete_new_version = parseFloat($.ui.version) >= 1.9;
+
 		// Setup
 		base.autocomplete_init = function(txt, delay, accept){
 
 			// visible event is fired before this extension is initialized, so check!
-			if (base.options.alwaysOpen && base.isVisible) {
+			if (base.options.alwaysOpen && base.isVisible()) {
 				base.autocomplete_setup();
 			}
 
@@ -45,8 +49,8 @@ $.fn.addAutocomplete = function(){
 				.bind('visible.keyboard',function(){
 					base.autocomplete_setup();
 				})
-				.bind('change.keyboard',function(e){
-					if (base.hasAutocomplete && base.isVisible) {
+				.bind('change.keyboard',function(){
+					if (base.hasAutocomplete && base.isVisible()) {
 						base.$el
 							.val(base.$preview.val())
 							.trigger('keydown.autocomplete');
@@ -85,9 +89,12 @@ $.fn.addAutocomplete = function(){
 			base.hasAutocomplete = (typeof(base.$autocomplete) === 'undefined') ? false : (base.$autocomplete.options.disabled) ? false : true;
 			// only bind to keydown once
 			if (base.hasAutocomplete && !base.autocomplete_bind) {
-				base.$preview.bind('keydown.keyboard',function(e){
+				base.$preview.bind('keydown',function(e){
 					// send keys to the autocomplete widget (arrow, pageup/down, etc)
 					return base.autocomplete_input(e);
+				});
+				base.$allKeys.bind('mouseup  mousedown mouseleave touchstart touchend touchcancel',function(e){
+					base.autocomplete_input(e);
 				});
 				base.autocomplete_bind = true;
 			}
@@ -101,9 +108,11 @@ $.fn.addAutocomplete = function(){
 			switch( event.keyCode ) {
 			case keyCode.PAGE_UP:
 				base.$autocomplete._move( "previousPage", event );
+				event.preventDefault(); // stop page from moving up
 				break;
 			case keyCode.PAGE_DOWN:
 				base.$autocomplete._move( "nextPage", event );
+				event.preventDefault(); // stop page from moving down
 				break;
 			case keyCode.UP:
 				base.$autocomplete._move( "previous", event );
@@ -117,15 +126,16 @@ $.fn.addAutocomplete = function(){
 				break;
 			case keyCode.ENTER:
 			case keyCode.NUMPAD_ENTER:
-				t = base.$autocomplete.menu.element.find('#ui-active-menuitem').text() || '';
+				t = base.$autocomplete.menu.element.find('#ui-active-menuitem,.ui-state-focus').text() || '';
 				if (t !== '') { base.$preview.val(t); }
+				if (base.autocomplete_new_version) { base.$autocomplete.menu.select( event ); }
 				break;
 			default:
 				// keypress is triggered before the input value is changed
 				clearTimeout( base.$autocomplete.searching );
 				base.$autocomplete.searching = setTimeout(function() {
 					// only search if the value has changed
-					if ( base.$autocomplete.term != base.$autocomplete.element.val() ) {
+					if ( base.$autocomplete.term !== base.$autocomplete.element.val() ) {
 						base.$autocomplete.selectedItem = null;
 						base.$autocomplete.search( null, event );
 					}
@@ -139,7 +149,7 @@ $.fn.addAutocomplete = function(){
 		// replace original function with this one
 		base.escClose = function(e){
 			// prevent selecting an item in autocomplete from closing keyboard
-			if (base.hasAutocomplete && e.target.id === 'ui-active-menuitem') { return; }
+			if ( base.hasAutocomplete && (e.target.id === 'ui-active-menuitem' || $(e.target).closest('ul').hasClass('ui-autocomplete')) ) { return; }
 			base.origEscClose(e);
 		};
 

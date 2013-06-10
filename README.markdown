@@ -40,7 +40,7 @@ Moved to the Wiki Pages: [Home](https://github.com/Mottie/Keyboard/wiki/Home) | 
 * Add more regional keyboard layouts.
 * Add an input mask extension. I think I'll try to make it compatible with [this plugin](https://github.com/RobinHerbots/jquery.inputmask).
 
-## Known Problems 
+## Known Problems
 
 * *IE* and *Opera*:
     * In a text area with multiple carriage returns, the caret positioning will be off when repositioning it with the mouse.
@@ -55,13 +55,13 @@ Moved to the Wiki Pages: [Home](https://github.com/Mottie/Keyboard/wiki/Home) | 
 ## Dependencies
 * Required
     * jQuery 1.4.3+
-    * jQuery UI Positioning Utility
+    * jQuery UI Positioning Utility (optional, if you position the keyboard yourself)
     * jQuery UI CSS (can be customized)
     * jQuery caret (included with source)
 * Optional
     * jQuery mousewheel plugin - allows using mousewheel to scroll through other key sets
     * jQuery keyboard typing extension - simulate typing on the virtual keyboard
-    * jQuery keyboard autocomplete extension - for use with jQuery UI autocomplete
+    * jQuery keyboard autocomplete extension - for use with jQuery UI autocomplete (also requires jQuery UI Positioning Utility)
 
 ## Licensing
 
@@ -73,162 +73,60 @@ Moved to the Wiki Pages: [Home](https://github.com/Mottie/Keyboard/wiki/Home) | 
 
 Only the latest changes will be shown below, see the wiki log to view older versions.
 
-### Version 1.15 (10/16/2012)
-
-* Added iPad touch events.
- * Thanks to [mfayez](https://github.com/mfayez) for sharing the code!
- * Hopefully this fixes issues [#100](https://github.com/Mottie/Keyboard/issues/100) and [#117](https://github.com/Mottie/Keyboard/issues/117).
-* Added a `{default}` action key definition.
-  * Clicking it makes the keyboard show the default keyset.
-  * See gitaarik's updated [iPad demo](http://mottie.github.com/Keyboard/) code to see how it is used.
-* Fixed a problem which should prevent a combo replace error. See [issue #116](https://github.com/Mottie/Keyboard/issues/116#issuecomment-9479917).
-* Modified space bar css to not use a negative text indent. See [this article](http://nicolasgallagher.com/another-css-image-replacement-technique/).
-
-### Version 1.14.1 (10/8/2012)
-
-* Disabled jQuery UI Themeswitcher from the main and layouts demo pages, as the script is no longer available.
-* Updated demos to use jQuery 1.8 and jQuery UI 1.9.
-
-### Version 1.14 (10/2/2012)
-
-* Added iPad &amp; iPad email demos by [gitaarik](https://github.com/gitaarik).
-
-### Version 1.13 (9/9/2012)
-
-* Fixed error caused by closing a keyboard in OSX using ctrl-esc or alt-esc. Fixes [issue #102](https://github.com/Mottie/Keyboard/issues/102).
-* Added Japanese and Spanish layouts thanks to [pacoalcantara](https://github.com/pacoalcantara)!
-* Added Polish layout thanks to Piotr (via email)!
-* Wide keys now use a `min-width` instead of `width`. This allows the key to properly expand to fit the text within it.
-* Updated autocomplete extension to save the caret position in IE9. Thanks to [banku](https://github.com/banku) for the fix in [issue #95](https://github.com/Mottie/Keyboard/issues/95).
-* Updated navigation extension:
-  * Removed the `toggleKey` option.
-  * Custom key codes can be assigned to any of the navigation keys within the new `$.keyboard.navigationKeys` object. Extend it as follows:
-
-    ```javascript
-    // change default navigation keys
-    $.extend($.keyboard.navigationKeys, {
-      toggle     : 112, // toggle key; F1 = 112 (event.which value for function 1 key)
-      enter      : 13,  // Enter
-      pageup     : 33,  // PageUp key
-      pagedown   : 34,  // PageDown key
-      end        : 35,  // End key
-      home       : 36,  // Home key
-      left       : 37,  // Left arrow key
-      up         : 38,  // Up arrow key
-      right      : 39,  // Right arrow key
-      down       : 40   // Down arrow key
-    });
-    ```
-
-   Enhancement request from [issue #90](https://github.com/Mottie/Keyboard/issues/90). Thanks [faboudib](https://github.com/faboudib)!
-
-  * Movement of the highlighted navigation key can now be triggered using `navigate` for predefined movement; see the [updated demo](http://mottie.github.com/Keyboard/navigate.html)
-
-    ```javascript
-    // navkey contains the name of the key: e.g. "home", "right", "pageup", etc
-    var navkey = "pageup";
-    $('#keyboard').trigger('navigate', navkey);
-    ```
-
-    Or, highlight a specific navigation key using the `navigateTo` trigger:
-
-    ```javascript
-    // navigate to the third row and fourth key (zero-based indexes) - [ row, index ]
-    $('#keyboard').trigger('navigateTo', [2,3]);
-    ```
-
-### Version 1.12.1 (9/4/2012)
+### Version 1.17.7s (6/10/2013)
 
 * Add singleton option to the options.
-  * See [issue #88](https://github.com/Mottie/Keyboard/issues/83) for details.
+  * See [issue #83](https://github.com/Mottie/Keyboard/issues/83) for details.
 
-### Version 1.12 (7/24/2012)
+### Version 1.17.7 (5/13/2013)
 
-* Made api functions `accept()` and `close()` return a boolean showing if the content was accepted or not.
-  * See [this demo](http://jsfiddle.net/Mottie/MK947/77/) for an example of how to use this returns when replacing the Accept action key function.
-  * See [issue #88](https://github.com/Mottie/Keyboard/issues/88) for details.
+* Fixed the autocomplete extension to not close the keyboard when clicking within the autocomplete window, including the scroll bar. Fixes [issue #170](https://github.com/Mottie/Keyboard/issues/170).
+* Fixed an issue in IE8 where a javascript error would occur in textarea when `usePreview` is `false`. Fixes [issue #134](https://github.com/Mottie/Keyboard/issues/134).
 
-### Version 1.11 (7/24/2012)
+### Version 1.17.6 (5/10/2013)
 
-* Switching inputs should now work properly
-  * Extra thanks to [david-hollifield](https://github.com/david-hollifield) for the help in fixing this bug!
-  * Fixes [issues #86](https://github.com/Mottie/Keyboard/issues/86).
-* Modified the validate procressing to no longer disable the accept button.
-  * The accept button now gets a class applied indicating if the input is valid (`ui-keyboard-valid-input`) or invalid (`ui-keyboard-invalid-input`).
-  * Very basic css added to colorize the accept button for these states.
-  * Fixes [issue #88](https://github.com/Mottie/Keyboard/issues/88).
-* Added `cancelClose` option
-  * This option only works with `acceptValid` is `true` and the `validate` function returns `false`.
-  * If `true`, this option will cancel the keyboard close initiated by the accept button. The keyboard can still be closed by pressing escape or the cancel button.
-  * If `false`, the validate function will ignore the user input, restore the input's previous value, and close the keyboard.
+* Fixed the check combo function to not cause an error when the keyboard is hidden. Fixes [issue #168](https://github.com/Mottie/Keyboard/issues/168).
 
-### Version 1.10 (7/9/2012)
+### Version 1.17.5 (5/6/2013)
 
-* Added `{next}` and `{prev}` action keys which makes switching between input/textareas easier.
-* Added the ability to make some action keys get the button action class applied
-  * The action class (options.css.buttonAction) makes the button stand out like the `{accept}`, `{cancel}` & `{enter}` keys.
-  * Add double exclamation point to the custom key name `{custom!!}` or to any built-in action key except: `{accept}`, `{alt}`, `{bksp}`, `{cancel}`, `{combo}`, `{dec}`, `{enter}`, `{meta#}`, `{shift}`, `{sign}`, `{sp:#}`, `{space}` or `{tab}`.
-  * See a demo named "Custom Action Key" in the *More Demos* section of the [home page wiki documentation](https://github.com/Mottie/Keyboard/wiki).
-* Added `stopAtEnd` option which when `true` prevents the default switch input function from wrapping to the first or last element. Useful when used in combination with the new `{next}` and `{prev}` action keys.
-* Modified diacritic key modification code:
-  * As before, diacritic (dead) key combinations will be ignored when the `{combo}` key is inactive.
-  * But now, in modern browsers, when the `{combo}` key is reactivated, only the two characters immediately to the left of the caret will be evaluated for key combinations instead of the entire input string.
-  * Older IE (IE8 and older) will continue to check and update the entire input string.
-  * Change made to make dead keys more useful as described in [issue #79](https://github.com/Mottie/Keyboard/issues/79).
-* Fixed `stayOpen` function not allowing keyboards to open/close with multiple keyboards. Hopefully this new method will squash all the problems with `stayOpen` and `alwaysOpen` options. Fixes [issue #82](https://github.com/Mottie/Keyboard/issues/82).
+* Keyboard visible callback now triggered after the preview gets focus. Fixes [issue #147](https://github.com/Mottie/Keyboard/issues/147).
 
-### Version 1.9.21 (6/18/2012)
+### Version 1.17.4 (4/14/2013)
 
-* IE should now behave like other browsers when switching inputs; clicking on another input with a keyboard open will now switch immediately instead of requiring a second click.
+* Fixed an issue with IE not giving the preview window focus.
+  * Thanks to [@semmelbroesel](https://github.com/semmelbroesel) for the suggestion.
+  * Fixes [issue #160](https://github.com/Mottie/Keyboard/issues/160).
 
-### Version 1.9.20 (6/17/2012)
+### Version 1.17.3 (4/4/2013)
 
-* Added Latvian layout. Thanks to Ivars via email.
+* The `change` callback function assigned in the options now contains proper keyboard parameters
+  * Previously, the change callback function was bound to the change event so that it would be called at the same time as any externally bound event listeners.
+  * Now the change callback is called slightly before the namespaced change event is triggered.
+  * The change callback is not called after the keyboard closes, when the non-namespaced change event is triggered.
+  * This fixes [issue #157](https://github.com/Mottie/Keyboard/issues/157).
+* Virtual keyboard keys should now ignore externally triggered events when the keyboard is hidden
+  * Previously, externally triggered events on the hidden keys would cause a javascript error.
+  * This fixes the problem brought up in [issue #158](https://github.com/Mottie/Keyboard/issues/158).
 
-### Version 1.9.19 (6/17/2012)
+### Version 1.17.2 (3/29/2013)
 
-* Modified script to add "ui-keyboard-autoaccepted" class name to the original input if the content was autoaccepted. Discussed in [issue #66](https://github.com/Mottie/Keyboard/issues/66).
-* Added `resetDefault` option which when `true` will force the keyset to reset to the default when the keyboard becomes visible.
-* Mulitple keyboards that are always open will not keep focus properly. Fixes issues [#69](https://github.com/Mottie/Keyboard/issues/69), [#73](https://github.com/Mottie/Keyboard/issues/73) and [#75](https://github.com/Mottie/Keyboard/issues/75).
-* Fixed carriage return issue in a textarea in IE8 (hopefully). Thanks to [blookie](https://github.com/blookie) for reporting it and providing a fix in [issue #71](https://github.com/Mottie/Keyboard/issues/71).
-* IE should now close the keyboard after clicking accept. Base element will no longer maintain focus. Fix for [issue #72](https://github.com/Mottie/Keyboard/issues/72).
-* Reveal will no longer unbind all events when `openOn` is empty. Fix for [issue #74](https://github.com/Mottie/Keyboard/issues/74).
-* Fixed locked keyboard input not allowing opening the keyboard a second time. Fix for [issue #77](https://github.com/Mottie/Keyboard/issues/77).
-* Fixed `stayOpen` option not working at all.
-* Added Hebrew layout. Thanks to Ofir Klinger for contributing the work!
-* Added a keyboard object as a variable in the typing callback function. Probably not necessary, but added anyway :P
+* After the content is accepted or canceled, a non-namespaced `change` event will now be triggered. This fixes [issue #146](https://github.com/Mottie/keyboard/issues/146).
+* Added French Bépo keyboard layout. Thanks to [utilisezlinux](https://github.com/utilisezlinux)! See [pull request #152](https://github.com/Mottie/Keyboard/pull/152).
+* Added Vietnamese layout with Telex combinations. Thanks to [tbvinh](https://github.com/tbvinh)! See [pull request #136](https://github.com/Mottie/Keyboard/pull/136).
+* Added `initialFocus` option:
+  * When `true` (default), the preview input will be focused when the keyboard becomes visible.
+  * If `false`, no focus will be set.
+  * Thanks to [anthonynoisestreet](https://github.com/anthonynoisestreet) for the feature request in [issue #150](https://github.com/Mottie/Keyboard/issues/150).
 
-### Version 1.9.18 (5/13/2012)
+### Version 1.17.1 (2/12/2013)
 
-* Fixed an issue of the input clearing when `usePreview` is `false` and `alwaysOpen` is `true`. Brought up in [issue #37](https://github.com/Mottie/Keyboard/issues/37#issuecomment-5298677).
+* Version bump to add plugin to [jQuery plugin registry](http://plugins.jquery.com/keyboard/).
 
-### Version 1.9.17 (5/8/2012)
+### Version 1.17 (2/12/2013)
 
-* Added Turkish layouts. Thanks to [barisaydinoglu](https://github.com/barisaydinoglu)!
-
-### Version 1.9.16 (4/30/2012)
-
-* Caret position is now better retained in older IE. Fix for [issue #61](https://github.com/Mottie/Keyboard/issues/61).
-* Invalid input should now revert back to the last valid input instead of breaking the keyboard. Fix for [issue #62](https://github.com/Mottie/Keyboard/issues/62).
-* The repeating key obtained by holding down the mouse on a virtual key can now be disabled by setting the `repeatRate` to `0` (zero). Fix for [issue #63](https://github.com/Mottie/Keyboard/issues/63).
-* Clicking on a virtual keyboard key will no longer submit a form - fix for [issue #64](https://github.com/Mottie/Keyboard/issues/64).
-
-### Version 1.9.15
-
-* Updated Mobile demo
-  * Updated to [jQuery Mobile version 1.1.0 RC1](http://jquerymobile.com/blog/2012/02/28/announcing-jquery-mobile-1-1-0-rc1/)
-  * Extra demo css added because the theme selector radio buttons were not displaying properly due to some issues with the data-attributes showing "[Object object]" instead of true or false. I'm not sure why, and don't have the time to investigate.
-* Fixed a problem where keyboards with `alwaysOpen` and `autoAccept` set to `true` would keep focus on the input when clicking outside the input. Fix for [issue #59](https://github.com/Mottie/Keyboard/issues/59).
-* Fixed an issue with `tabNavigation` not working properly. Also, discovered that `tabindex="0"` should not be used. Fix for [issue #60](https://github.com/Mottie/Keyboard/issues/60).
-
-### Version 1.9.14
-
-* Multiple synchronized keyboards with `alwaysOpen` and `autoAccept` set to `true` should now switch properly. Fix for [issue #58](https://github.com/Mottie/Keyboard/issues/58).
-
-### Version 1.9.13
-
-* Multiple synchronized keyboards with `alwaysOpen` set to `true` should now switch properly. Fix for [issue #58](https://github.com/Mottie/Keyboard/issues/58).
-
-### Version 1.9.12.1
-
-* Updated jquery.mousewheel.js, as the it was only scrolling in one direction.
+* Added portuguese layout and modified the layout demo to build the layout selector instead of adding an option element each time.
+* Added an `{empty}` special key which inserts a blank unclickable key into the keyboard. Using `{sp:1}` will does not add a key, but a blank space between keys.
+* Added a method to restore the caret position in IE in attempts to fix [issue #131](https://github.com/Mottie/keyboard/issues/131).
+* Added a `return false` to prevent a click through on elements behind the keyboard when the `autoAccept` option is `true`.
+* Modified the `switchInput` function to now target non-keyboard enabled elements - try [this demo](http://jsfiddle.net/Mottie/MK947/715/).
+* Removed Opera textarea hack as it has been fixed in the latest versions. [This demo](http://jsfiddle.net/vwb3c/) should work properly now (keep hitting carriage returns).

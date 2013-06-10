@@ -1,9 +1,5 @@
 jQuery(function($) {
 
-	// Theme switcher
-	// ********************
-	// $('#switcher').themeswitcher();
-
 	// QWERTY Text Input
 	// The bottom of this file is where the autocomplete extension is added
 	// ********************
@@ -242,12 +238,12 @@ jQuery(function($) {
 	$('#ipad').keyboard({
 
 		display: {
-			'bksp'   :  "\u2190",
-			'accept' : 'return',
-			'default'  : 'ABC',
-			'shift'  : '\u21d1',
-			'meta1'  : '.?123',
-			'meta2'  : '#+='
+			'bksp'    : '\u2190',
+			'accept'  : 'return',
+			'default' : 'ABC',
+			'shift'   : '\u21d1',
+			'meta1'   : '.?123',
+			'meta2'   : '#+='
 		},
 
 		layout: 'custom',
@@ -288,12 +284,12 @@ jQuery(function($) {
 	$('#ipad-email').keyboard({
 
 		display: {
-			'bksp': '\u2190',
-			'enter': 'return',
-			'default': 'ABC',
-			'meta1': '.?123',
-			'meta2': '#+=',
-			'accept': '\u21d3'
+			'bksp'    : '\u2190',
+			'enter'   : 'return',
+			'default' : 'ABC',
+			'meta1'   : '.?123',
+			'meta2'   : '#+=',
+			'accept'  : '\u21d3'
 		},
 
 		layout: 'custom',
@@ -329,17 +325,17 @@ jQuery(function($) {
 
 	});
 
-	// Console showing callback messages under the theme switcher
+	// Console showing callback messages
 	// ********************
 	$('.ui-keyboard-input').bind('visible.keyboard hidden.keyboard beforeClose.keyboard accepted.keyboard canceled.keyboard', function(e, keyboard, el, status){
 		var c = $('#console'),
-			t = '<li>' + $(el).parent().find('h2').text();
+			t = '<li><span class="keyboard">' + $(el).parent().find('h2').text() + '</span>';
 			switch (e.type){
-				case 'visible'  : t += ' keyboard is visible'; break;
-				case 'hidden'   : t += ' keyboard is now hidden'; break;
-				case 'accepted' : t += ' content "' + el.value + '" was accepted' + ($(el).is('[type=password]') ? ', yeah... not so secure :(' : ''); break;
-				case 'canceled' : t += ' content was ignored'; break;
-				case 'beforeClose' : t += ' keyboard is about to close, contents were ' + (status ? 'accepted' : 'ignored'); break;
+				case 'visible'  : t += ' keyboard is <span class="event">visible</span>'; break;
+				case 'hidden'   : t += ' keyboard is now <span class="event">hidden</span>'; break;
+				case 'accepted' : t += ' content "<span class="content">' + el.value + '</span>" was <span class="event">accepted</span>' + ($(el).is('[type=password]') ? ', yeah... not so secure :(' : ''); break;
+				case 'canceled' : t += ' content was <span class="event ignored">ignored</span>'; break;
+				case 'beforeClose' : t += ' keyboard is about to <span class="event">close</span>, contents were <span class="event ' + (status ? 'accepted">accepted' : 'ignored">ignored') + '</span>'; break;
 			}
 		t += '</li>';
 		c.append(t);
@@ -351,6 +347,8 @@ jQuery(function($) {
 	$('h2 span').click(function(){
 		var t = '<h2>' + $(this).parent().text() + ' Code</h2>' + $(this).closest('.block').find('.code').html();
 		$('#showcode').html(t).show();
+		$("#showcode .js").chili();
+		$("#showcode .html").chili();
 	});
 
 	// add tooltips
