@@ -15,21 +15,14 @@ $.keyboard.layouts['greek-qwerty'] = {
 		"{tab} ; \u03c2 \u03b5 \u03c1 \u03c4 \u03c5 \u03b8 \u03b9 \u03bf \u03c0 [ ] \\",
 		"\u03b1 \u03c3 \u03b4 \u03c6 \u03b3 \u03b7 \u03be \u03ba \u03bb ' \" {enter}",
 		"{shift} \u03b6 \u03c7 \u03c8 \u03c9 \u03b2 \u03bd \u03bc , . / {shift}",
-		"{accept} {alt} {space} {alt} {cancel}"
+		"{accept} {space} {cancel}"
 	],
 	'shift' : [
-		'\u00b0 ! " \u00a7 $ % & / ( ) = ? \u0300 {bksp}',
+		'~ ! @ # $ % ^ & * ( ) _ + {bksp}',
 		"{tab} : Σ Ε Ρ Τ Υ Θ Ι Ο Π { } \\",
 		"Α Σ Δ Φ Γ Η Ξ Κ Λ \' \" {enter}",
 		"{shift} Ζ Χ Ψ Ω Β Ν Μ < > ? {shift}",
-		"{accept} {alt} {space} {alt} {cancel}"
-	],
-	'alt' : [
-		'\u0302 1 \u00b2 \u00b3 4 5 6 { [ ] } \\ \u0301 {bksp}',
-		"{tab} @ w \u20ac r t z u i o p \u00fc \u0303",
-		"a s d f g h j k l \u00f6 \u00e4 # {enter}",
-		"{shift} \u007c y x c v b n \u00b5 , . - {shift}",
-		"{accept} {alt} {space} {alt} {cancel}"
+		"{accept} {space} {cancel}"
 	]
 };
 
