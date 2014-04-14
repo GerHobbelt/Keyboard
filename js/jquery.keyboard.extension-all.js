@@ -173,7 +173,7 @@ $.fn.addAutocomplete = function(){
 		// set up after keyboard is visible
 		base.autocomplete_setup = function(){
 			// look for autocomplete
-			base.$autocomplete = base.$el.data('autocomplete') || base.$el.data('uiAutocomplete');
+			base.$autocomplete = base.$el.data('autocomplete') || base.$el.data('uiAutocomplete') || base.$el.data('ui-autocomplete');
 			base.hasAutocomplete = (typeof(base.$autocomplete) === 'undefined') ? false : (base.$autocomplete.options.disabled) ? false : true;
 			// only bind to keydown once
 			if (base.hasAutocomplete) {
